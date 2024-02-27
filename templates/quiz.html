@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        #options button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="jumbotron">
+            <h1>Quiz</h1>
+        <div id="question"></div>
+        <div id="options"></div>
+        <button id="nextBtn" class="btn btn-primary">Next</button>
+        </div>
+    </div>
+    <script>
+        let currentQuestion = 0;
+        let questions = [];
+
+        async function getQuestions() {
+            const response = await fetch('/questions');
+            const data = await response.json();
+            questions = data;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const questionElement = document.getElementById('question');
+            const optionsElement = document.getElementById('options');
+            const question = questions[currentQuestion];
+            const options = question.incorrect_answers.concat(question.correct_answer);
+            options.sort(() => Math.random() - 0.5);
+
+            questionElement.innerHTML = question.question;
+
+            optionsElement.innerHTML = '';
+            options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.textContent = option;
+                btn.className = 'btn btn-secondary';
+                btn.addEventListener('click', () => checkAnswer(option));
+                optionsElement.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            const correctAnswer = questions[currentQuestion].correct_answer;
+            if (selected === correctAnswer) {
+                alert('Correct!');
+            } else {
+                alert(`Incorrect. The correct answer is ${correctAnswer}`);
+            }
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                alert('Quiz finished!');
+                currentQuestion = 0;
+            }
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', () => showQuestion());
+
+        getQuestions();
+    </script>
+</body>
+</html>
